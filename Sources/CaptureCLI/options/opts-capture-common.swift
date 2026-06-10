@@ -30,6 +30,17 @@ struct CaptureOutputOptions: Sendable, ArgumentGroup {
 
         return output
     }
+
+    func directoryURL() throws -> URL {
+        let path = try path.unwrap(
+            message: "Missing --output."
+        )
+
+        return URL(
+            fileURLWithPath: path.expandingTilde(),
+            isDirectory: true
+        )
+    }
 }
 
 private extension CaptureOutputOptions {
@@ -218,6 +229,12 @@ struct CaptureMicrophoneOptions: Sendable, ArgumentGroup {
             sampleRate: sampleRate,
             channel: channel,
             codec: codec
+        )
+    }
+
+    var sourceName: String? {
+        trimmedOrNil(
+            name
         )
     }
 }

@@ -3,7 +3,7 @@ import Capture
 import Foundation
 import Methods
 
-struct SourceProcessAudioCommandOptions: Sendable, ArgumentParsed {
+struct ProcessAudioCommandOptions: Sendable, ArgumentParsed {
     typealias ArgumentPayload = Payload
 
     let options: CaptureProcessAudioRecordingOptions

@@ -16,7 +16,8 @@ enum CaptureCLICommand: ArgumentCommand {
         CameraCommand.self,
         ComposeCommand.self,
         RecordCommand.self,
-        SourceCommand.self,
+        ProcessCommand.self,
+        SourcesCommand.self,
     ]
 
     static func main() async {

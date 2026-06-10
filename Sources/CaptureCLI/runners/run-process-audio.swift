@@ -1,7 +1,7 @@
 import Capture
 import Foundation
 
-enum SourceProcessAudioCommandRunner {
+enum ProcessAudioCommandRunner {
     static func run(
         _ options: CaptureProcessAudioRecordingOptions
     ) async throws {
@@ -15,7 +15,7 @@ enum SourceProcessAudioCommandRunner {
             "  duration    \(options.duration.seconds)s"
         )
         print(
-            "  source      \(sourceDescription(options.selection))"
+            "  process     \(selectionDescription(options.selection))"
         )
 
         let result = try await CoreAudioProcessAudioRecorder().record(
@@ -63,11 +63,17 @@ enum SourceProcessAudioCommandRunner {
                 "Process audio captured no buffers from \(result.processName)."
             )
         }
+
+        guard result.capturedAudio else {
+            throw CaptureError.audioCapture(
+                "Process audio captured silence from \(result.processName)."
+            )
+        }
     }
 }
 
-private extension SourceProcessAudioCommandRunner {
-    static func sourceDescription(
+private extension ProcessAudioCommandRunner {
+    static func selectionDescription(
         _ selection: CaptureProcessAudioSelection
     ) -> String {
         switch selection {
@@ -78,7 +84,7 @@ private extension SourceProcessAudioCommandRunner {
             return "app \(name)"
 
         case .bundle_identifier(let bundleIdentifier):
-            return "bundle \(bundleIdentifier)"
+            return "bundle id \(bundleIdentifier)"
         }
     }
 }
