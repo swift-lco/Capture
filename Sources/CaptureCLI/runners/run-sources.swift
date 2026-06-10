@@ -3,6 +3,7 @@ import AudioToolbox
 import Capture
 import CoreMedia
 import Foundation
+import Terminal
 
 enum SourcesCommandRunner {
     static func run(
@@ -72,7 +73,6 @@ enum SourcesCommandRunner {
                 stopSignal: stopSignal
             )
             timedStop = nil
-            listener?.start()
 
         case .duration(let duration):
             listener = nil
@@ -87,174 +87,235 @@ enum SourcesCommandRunner {
             }
         }
 
-        defer {
-            listener?.stop()
-            timedStop?.cancel()
-        }
+        let timer = CaptureCLI.recordingTimer(
+            limitSeconds: mode.durationSeconds,
+            output: output,
+            audioName: options.audioSourceName,
+            systemAudioEnabled: options.systemAudio.enabled,
+            audioSampleRate: options.audio?.sampleRate,
+            audioChannelCount: options.audio?.channel,
+            title: "capture: recording sources"
+        )
 
+        var exportStatusLine: TerminalLiveStatusLine?
+        var recordingTimerStopped = false
         let startedAt = Date()
 
-        print(
-            "sources: recording"
-        )
-        print(
-            "  output      \(output.path)"
-        )
-        print(
-            "  video       \(videoDirectory.path)"
-        )
-        print(
-            "  audio       \(audioDirectory.path)"
-        )
-
-        if options.alignStart {
-            print(
-                "  raw         \(rawDirectory.path)"
-            )
-            print(
-                "  alignment   start"
-            )
-        }
-
-        print(
-            "  screen      \(options.screenEnabled ? "enabled" : "disabled")"
-        )
-        print(
-            "  cameras     \(options.cameras.map(\.name).joined(separator: ", "))"
-        )
-        print(
-            "  input audio \(options.audioSourceName ?? "disabled")"
-        )
-        print(
-            "  system      \(options.systemAudio.enabled ? "enabled" : "disabled")"
-        )
-
-        var tasks: [Task<SourcesManifest.Source, Error>] = []
-
-        if options.screenEnabled {
-            tasks.append(
-                Task {
-                    try await recordScreen(
-                        options: options,
-                        output: recordingVideoDirectory.appendingPathComponent(
-                            "screen-main.mov"
-                        ),
-                        stopSignal: stopSignal
-                    )
-                }
-            )
-        }
-
-        if options.systemAudio.enabled {
-            tasks.append(
-                Task {
-                    try await recordSystemAudio(
-                        options: options,
-                        output: recordingAudioDirectory.appendingPathComponent(
-                            "system-audio.m4a"
-                        ),
-                        stopSignal: stopSignal
-                    )
-                }
-            )
-        }
-
-        for camera in options.cameras {
-            tasks.append(
-                Task {
-                    try await recordCamera(
-                        camera,
-                        options: options,
-                        output: recordingVideoDirectory.appendingPathComponent(
-                            "camera-\(slug(camera.name)).mov"
-                        ),
-                        stopSignal: stopSignal
-                    )
-                }
-            )
-        }
-
-        if let audio = options.audio {
-            let sourceName = options.audioSourceName ?? "input-device"
-
-            tasks.append(
-                Task {
-                    try await recordAudioInput(
-                        audio,
-                        sourceName: sourceName,
-                        video: options.video,
-                        output: recordingAudioDirectory.appendingPathComponent(
-                            "\(slug(sourceName)).wav"
-                        ),
-                        chain: options.microphoneChain,
-                        stopSignal: stopSignal
-                    )
-                }
-            )
-        }
-
-        guard !tasks.isEmpty else {
-            throw CaptureError.audioCapture(
-                "No sources enabled. Add --screen, --camera, --audio, or --system-audio."
-            )
-        }
-
-        var recordedSources: [SourcesManifest.Source] = []
-
-        for task in tasks {
-            recordedSources.append(
-                try await task.value
-            )
-        }
-
-        let alignment = options.alignStart
-            ? try await alignSourcesAtStart(
-                recordedSources,
-                videoDirectory: videoDirectory,
-                audioDirectory: audioDirectory
-            )
-            : SourcesAlignmentResult(
-                metadata: nil,
-                sources: recordedSources
-            )
-
-        let manifest = SourcesManifest(
-            startedAt: startedAt,
-            finishedAt: Date(),
-            output: output.path,
-            alignment: alignment.metadata,
-            sources: alignment.sources.sorted {
-                $0.output < $1.output
+        func stopRecordingTimer(
+            finalLine: String
+        ) async {
+            guard !recordingTimerStopped else {
+                return
             }
-        )
 
-        try writeManifest(
-            manifest,
-            output: output.appendingPathComponent(
-                "capture.json"
-            )
-        )
-
-        print(
-            "sources: stopped"
-        )
-
-        for source in manifest.sources {
-            print(
-                "  wrote       \(source.output)"
+            await timer.stop(
+                finalLine: finalLine
             )
 
-            if let headPaddingSeconds = source.headPaddingSeconds,
-               headPaddingSeconds > 0 {
-                print(
-                    "              start padding \(String(format: "%.3f", headPaddingSeconds))s"
+            recordingTimerStopped = true
+        }
+
+        func stopExportStatusLine(
+            finalLine: String
+        ) async {
+            guard let statusLine = exportStatusLine else {
+                return
+            }
+
+            await statusLine.stop(
+                finalLine: finalLine
+            )
+
+            exportStatusLine = nil
+        }
+
+        listener?.start()
+        await timer.start()
+
+        do {
+            var tasks: [Task<SourcesManifest.Source, Error>] = []
+
+            if options.screenEnabled {
+                tasks.append(
+                    Task {
+                        try await recordScreen(
+                            options: options,
+                            output: recordingVideoDirectory.appendingPathComponent(
+                                "screen-main.mov"
+                            ),
+                            stopSignal: stopSignal
+                        )
+                    }
                 )
             }
-        }
 
-        print(
-            "  manifest    \(output.appendingPathComponent("capture.json").path)"
-        )
+            if options.systemAudio.enabled {
+                tasks.append(
+                    Task {
+                        try await recordSystemAudio(
+                            options: options,
+                            output: recordingAudioDirectory.appendingPathComponent(
+                                "system-audio.m4a"
+                            ),
+                            stopSignal: stopSignal
+                        )
+                    }
+                )
+            }
+
+            for camera in options.cameras {
+                tasks.append(
+                    Task {
+                        try await recordCamera(
+                            camera,
+                            options: options,
+                            output: recordingVideoDirectory.appendingPathComponent(
+                                "camera-\(slug(camera.name)).mov"
+                            ),
+                            stopSignal: stopSignal
+                        )
+                    }
+                )
+            }
+
+            if let audio = options.audio {
+                let sourceName = options.audioSourceName ?? "input-device"
+
+                tasks.append(
+                    Task {
+                        try await recordAudioInput(
+                            audio,
+                            sourceName: sourceName,
+                            video: options.video,
+                            output: recordingAudioDirectory.appendingPathComponent(
+                                "\(slug(sourceName)).wav"
+                            ),
+                            chain: options.microphoneChain,
+                            stopSignal: stopSignal
+                        )
+                    }
+                )
+            }
+
+            guard !tasks.isEmpty else {
+                throw CaptureError.audioCapture(
+                    "No sources enabled. Add --screen, --camera, --audio, or --system-audio."
+                )
+            }
+
+            var recordedSources: [SourcesManifest.Source] = []
+
+            for task in tasks {
+                recordedSources.append(
+                    try await task.value
+                )
+            }
+
+            listener?.stop()
+            timedStop?.cancel()
+
+            let recordingDuration = Date().timeIntervalSince(
+                startedAt
+            )
+
+            await stopRecordingTimer(
+                finalLine: "recording: stopped at \(TerminalDurationFormatter.format(recordingDuration))"
+            )
+
+            let alignment: SourcesAlignmentResult
+
+            if options.alignStart {
+                exportStatusLine = TerminalLiveStatusLine(
+                    leadingLines: [
+                        "export: rendering aligned sources",
+                    ]
+                ) { frame in
+                    "export: rendering    time: \(frame.elapsedText)"
+                }
+
+                await exportStatusLine?.start()
+
+                do {
+                    alignment = try await alignSourcesAtStart(
+                        recordedSources,
+                        videoDirectory: videoDirectory,
+                        audioDirectory: audioDirectory
+                    )
+
+                    await stopExportStatusLine(
+                        finalLine: "export: exported \(output.path)"
+                    )
+                } catch {
+                    await stopExportStatusLine(
+                        finalLine: "export: failed"
+                    )
+
+                    throw error
+                }
+            } else {
+                alignment = SourcesAlignmentResult(
+                    metadata: nil,
+                    sources: recordedSources
+                )
+            }
+
+            let manifest = SourcesManifest(
+                startedAt: startedAt,
+                finishedAt: Date(),
+                output: output.path,
+                alignment: alignment.metadata,
+                sources: alignment.sources.sorted {
+                    $0.output < $1.output
+                }
+            )
+
+            try writeManifest(
+                manifest,
+                output: output.appendingPathComponent(
+                    "capture.json"
+                )
+            )
+
+            print(
+                "sources: wrote"
+            )
+
+            for source in manifest.sources {
+                print(
+                    "  output      \(source.output)"
+                )
+
+                if let rawOutput = source.rawOutput {
+                    print(
+                        "  raw         \(rawOutput)"
+                    )
+                }
+
+                if let headPaddingSeconds = source.headPaddingSeconds,
+                   headPaddingSeconds > 0 {
+                    print(
+                        "  padding     \(String(format: "%.3f", headPaddingSeconds))s"
+                    )
+                }
+            }
+
+            print(
+                "  manifest    \(output.appendingPathComponent("capture.json").path)"
+            )
+        } catch {
+            listener?.stop()
+            timedStop?.cancel()
+
+            await stopRecordingTimer(
+                finalLine: "recording: failed"
+            )
+
+            await stopExportStatusLine(
+                finalLine: "export: failed"
+            )
+
+            throw error
+        }
     }
 }
 
