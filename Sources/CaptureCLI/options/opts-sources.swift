@@ -43,7 +43,17 @@ struct SourcesCommandOptions: Sendable, ArgumentParsed {
         self.systemAudio = try arguments.systemAudio.systemAudio()
         self.microphoneChain = arguments.microphoneChain.chain
         self.screenEnabled = arguments.screen
-        self.cameras = arguments.cameras()
+        self.cameras = arguments.cameras
+            .compactMap {
+                trimmedOrNil(
+                    $0
+                )
+            }
+            .map {
+                SourcesCameraInput(
+                    name: $0
+                )
+            }
         self.alignStart = arguments.alignStart
     }
 
@@ -75,20 +85,11 @@ struct SourcesCommandOptions: Sendable, ArgumentParsed {
         @Flag("align-start")
         var alignStart: Bool
 
-        @Opt(
+        @Opts(
             "camera",
             short: "c"
         )
-        var camera: String?
-
-        @Opt("camera-2")
-        var camera2: String?
-
-        @Opt("camera-3")
-        var camera3: String?
-
-        @Opt("camera-4")
-        var camera4: String?
+        var cameras: [String]
 
         @Opt(
             "sample-rate",
@@ -103,25 +104,6 @@ struct SourcesCommandOptions: Sendable, ArgumentParsed {
         var channel: Int
 
         init() {}
-
-        func cameras() -> [SourcesCameraInput] {
-            [
-                camera,
-                camera2,
-                camera3,
-                camera4,
-            ]
-                .compactMap {
-                    trimmedOrNil(
-                        $0
-                    )
-                }
-                .map {
-                    SourcesCameraInput(
-                        name: $0
-                    )
-                }
-        }
     }
 }
 

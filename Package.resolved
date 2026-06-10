@@ -1,5 +1,5 @@
 {
-  "originHash" : "0282d8c1b2732cc739555753c515913e7b18508d962d66594aad009bbd898ad8",
+  "originHash" : "5752204328eee73d9e061d260b40a9b2614fe9783beb26902957b8eb54684793",
   "pins" : [
     {
       "identity" : "ansi",
@@ -16,7 +16,7 @@
       "location" : "https://github.com/leviouwendijk/Arguments.git",
       "state" : {
         "branch" : "master",
-        "revision" : "554f854bf59b88f3bc97a41e6fa622430d88e75c"
+        "revision" : "a4317bd7d254b68f66a63f54d159a87f157b3a0e"
       }
     },
     {
@@ -43,7 +43,7 @@
       "location" : "https://github.com/leviouwendijk/Primitives.git",
       "state" : {
         "branch" : "master",
-        "revision" : "e112f25245dde3fcc2b87f746a7c090cbe8d2a3b"
+        "revision" : "1682a0cf9c3e921cf08b0fb22beea88013763a32"
       }
     },
     {
@@ -70,7 +70,7 @@
       "location" : "https://github.com/leviouwendijk/TestFlows.git",
       "state" : {
         "branch" : "master",
-        "revision" : "cc6f6216e9c77cf2862c047a4666336cc47d25e8"
+        "revision" : "79b1af3ebd1fe834f2bd0b68642e55f25a261428"
       }
     }
   ],
