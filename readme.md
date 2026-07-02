@@ -320,14 +320,29 @@ Trigger the retained-partial-recording failure path:
 capturer test fail
 ```
 
+Capture all sources individually:
+
+```sh
+capturer sources \
+    --screen \
+    --camera "FaceTime HD Camera" \
+    --camera "levi-iphone-16-pro Camera" \
+    --audio "MG-XU" \
+    --sample-rate 44100 \
+    --channel 2 \
+    --align-start \
+    --output /tmp/video-01 \
+```
+
 ## Background
 
 I tried doing this with `ffmpeg`, but it caused audio underruns I could not and do not want to resolve. This is a light implementation over native macOS APIs.
 
 ## Ideas
 
-* [ ] multi-input support for audio and screens
-* [ ] multi-output rendering, summing, gain, and routing
+* [x] multi-input support for audio and screens
+* [-] multi-output rendering, summing, gain, and routing
+* [ ] proper alignment of sources
 * [ ] prepending sine wave in recording and video flicker for synchronization
 * [ ] live input gain modification
 * [ ] live metering
