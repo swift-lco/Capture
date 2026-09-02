@@ -77,11 +77,21 @@ public final class CaptureAudioBufferRecordingSession: @unchecked Sendable {
     public func firstSampleHostTimeSeconds() -> TimeInterval? {
         input.firstSampleHostTimeSeconds()
     }
+
+    public func status() -> CaptureAudioBufferRecordingStatus? {
+        guard input.currentStartResult() != nil else {
+            return nil
+        }
+
+        return collector.status()
+    }
 }
 
 private final class CaptureAudioBufferCollector: @unchecked Sendable {
     private let lock = NSLock()
     private var buffers: [MediaAudioBuffer] = []
+    private var durationSeconds: TimeInterval = 0
+    private var rmsAmplitude: Float?
 
     func append(
         _ buffer: MediaAudioBuffer
@@ -94,6 +104,16 @@ private final class CaptureAudioBufferCollector: @unchecked Sendable {
         buffers.append(
             buffer
         )
+
+        if buffer.sampleRate > 0 {
+            durationSeconds += Double(
+                buffer.frameCount
+            ) / Double(
+                buffer.sampleRate
+            )
+        }
+
+        rmsAmplitude = buffer.rmsAmplitude
     }
 
     func reset() {
@@ -105,6 +125,8 @@ private final class CaptureAudioBufferCollector: @unchecked Sendable {
         buffers.removeAll(
             keepingCapacity: true
         )
+        durationSeconds = 0
+        rmsAmplitude = nil
     }
 
     func snapshot() -> [MediaAudioBuffer] {
@@ -114,5 +136,17 @@ private final class CaptureAudioBufferCollector: @unchecked Sendable {
         }
 
         return buffers
+    }
+
+    func status() -> CaptureAudioBufferRecordingStatus {
+        lock.lock()
+        defer {
+            lock.unlock()
+        }
+
+        return CaptureAudioBufferRecordingStatus(
+            durationSeconds: durationSeconds,
+            rmsAmplitude: rmsAmplitude
+        )
     }
 }

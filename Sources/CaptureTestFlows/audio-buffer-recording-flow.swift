@@ -82,6 +82,45 @@ extension CaptureFlowSuite {
                 )
             }
 
+            Step("recording status derives duration and latest RMS level") {
+                let sampleData = [
+                    Float(0.5),
+                    Float(-0.5),
+                ].withUnsafeBufferPointer { samples in
+                    Data(
+                        bytes: samples.baseAddress!,
+                        count: samples.count
+                            * MemoryLayout<Float>.size
+                    )
+                }
+
+                let buffer = MediaAudioBuffer(
+                    data: sampleData,
+                    frameCount: 2,
+                    packetCount: 2,
+                    sampleRate: 4,
+                    channelCount: 1,
+                    sample: .float32,
+                    hostTimeSeconds: nil
+                )
+                let status = CaptureAudioBufferRecordingStatus(
+                    durationSeconds: 0.5,
+                    rmsAmplitude: buffer.rmsAmplitude
+                )
+
+                try Expect.equal(
+                    status.durationSeconds,
+                    0.5,
+                    "audio-buffer-recording.status-duration"
+                )
+
+                try Expect.equal(
+                    status.rmsAmplitude,
+                    0.5,
+                    "audio-buffer-recording.status-rms"
+                )
+            }
+
             Step("empty finite recording result is explicit") {
                 let result = CaptureAudioBufferRecordingResult(
                     start: CaptureAudioInputStartResult(
