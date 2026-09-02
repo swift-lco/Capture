@@ -1,3 +1,4 @@
+import MediaCore
 import AudioToolbox
 import CoreAudio
 import Foundation
@@ -178,7 +179,7 @@ private extension CoreAudioProcessAudioWAVWriter {
     func makeBuffer(
         inputData: UnsafePointer<AudioBufferList>,
         inputTime: UnsafePointer<AudioTimeStamp>?
-    ) throws -> CaptureAudioInputBuffer {
+    ) throws -> MediaAudioBuffer {
         let state = currentFormats()
 
         guard let inputFormat = state.input,
@@ -235,7 +236,7 @@ private extension CoreAudioProcessAudioWAVWriter {
         bytesPerSample: Int,
         sampleRate: Int,
         hostTimeSeconds: TimeInterval?
-    ) -> CaptureAudioInputBuffer {
+    ) -> MediaAudioBuffer {
         guard let data = audioBuffer.mData,
               audioBuffer.mDataByteSize > 0 else {
             return emptyBuffer(
@@ -254,7 +255,7 @@ private extension CoreAudioProcessAudioWAVWriter {
         )
         let frames = byteCount / bytesPerFrame
 
-        return CaptureAudioInputBuffer(
+        return MediaAudioBuffer(
             data: Data(
                 bytes: data,
                 count: frames * bytesPerFrame
@@ -276,7 +277,7 @@ private extension CoreAudioProcessAudioWAVWriter {
         bytesPerSample: Int,
         sampleRate: Int,
         hostTimeSeconds: TimeInterval?
-    ) -> CaptureAudioInputBuffer {
+    ) -> MediaAudioBuffer {
         guard buffers.count > 0 else {
             return emptyBuffer(
                 sampleRate: sampleRate,
@@ -330,7 +331,7 @@ private extension CoreAudioProcessAudioWAVWriter {
         }
 
         return samples.withUnsafeBufferPointer { pointer in
-            CaptureAudioInputBuffer(
+            MediaAudioBuffer(
                 data: Data(
                     buffer: pointer
                 ),
@@ -350,8 +351,8 @@ private extension CoreAudioProcessAudioWAVWriter {
         sampleRate: Int,
         channels: Int,
         hostTimeSeconds: TimeInterval?
-    ) -> CaptureAudioInputBuffer {
-        CaptureAudioInputBuffer(
+    ) -> MediaAudioBuffer {
+        MediaAudioBuffer(
             data: Data(),
             frameCount: 0,
             packetCount: 0,
@@ -378,7 +379,7 @@ private extension CoreAudioProcessAudioWAVWriter {
     }
 
     func record(
-        _ buffer: CaptureAudioInputBuffer
+        _ buffer: MediaAudioBuffer
     ) {
         let bufferPeak = buffer.monoFloatSamples().reduce(
             Float(0)

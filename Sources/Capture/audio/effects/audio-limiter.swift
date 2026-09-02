@@ -1,3 +1,4 @@
+import MediaCore
 import Darwin
 import Foundation
 
@@ -65,8 +66,8 @@ public extension AudioLimiter {
         }
 
         public mutating func process(
-            _ buffer: CaptureAudioInputBuffer
-        ) throws -> CaptureAudioInputBuffer {
+            _ buffer: MediaAudioBuffer
+        ) throws -> MediaAudioBuffer {
             let resolvedCeiling = max(
                 0.0001,
                 min(

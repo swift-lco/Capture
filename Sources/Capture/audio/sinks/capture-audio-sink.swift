@@ -1,3 +1,4 @@
+import MediaCore
 import AudioToolbox
 import Foundation
 
@@ -7,7 +8,7 @@ internal protocol CaptureAudioSink: AnyObject, Sendable {
     ) throws
 
     func append(
-        _ buffer: CaptureAudioInputBuffer
+        _ buffer: MediaAudioBuffer
     ) throws
 
     func finish() throws

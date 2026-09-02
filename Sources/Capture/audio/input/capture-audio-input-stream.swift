@@ -1,3 +1,4 @@
+import MediaCore
 import AudioToolbox
 import Foundation
 
@@ -5,8 +6,8 @@ internal typealias CaptureAudioInputStartHandler = @Sendable (
     AudioStreamBasicDescription
 ) throws -> Void
 
-internal typealias CaptureAudioInputBufferHandler = @Sendable (
-    CaptureAudioInputBuffer
+internal typealias MediaAudioBufferHandler = @Sendable (
+    MediaAudioBuffer
 ) throws -> Void
 
 internal protocol CaptureAudioInputStream {

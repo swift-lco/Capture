@@ -1,3 +1,4 @@
+import MediaCore
 import Darwin
 import Foundation
 
@@ -76,8 +77,8 @@ public extension AudioDeEsser {
         }
 
         public mutating func process(
-            _ buffer: CaptureAudioInputBuffer
-        ) throws -> CaptureAudioInputBuffer {
+            _ buffer: MediaAudioBuffer
+        ) throws -> MediaAudioBuffer {
             prepare(
                 buffer: buffer
             )
@@ -122,7 +123,7 @@ public extension AudioDeEsser {
 
 private extension AudioDeEsser.Standard {
     mutating func prepare(
-        buffer: CaptureAudioInputBuffer
+        buffer: MediaAudioBuffer
     ) {
         let channelCount = max(
             1,

@@ -1,3 +1,4 @@
+import MediaCore
 import Darwin
 import Foundation
 
@@ -215,8 +216,8 @@ public extension AudioEqualizer {
         }
 
         public mutating func process(
-            _ buffer: CaptureAudioInputBuffer
-        ) throws -> CaptureAudioInputBuffer {
+            _ buffer: MediaAudioBuffer
+        ) throws -> MediaAudioBuffer {
             guard !bands.isEmpty else {
                 return buffer
             }
@@ -248,7 +249,7 @@ public extension AudioEqualizer {
 
 private extension AudioEqualizer.Parametric {
     mutating func prepare(
-        buffer: CaptureAudioInputBuffer
+        buffer: MediaAudioBuffer
     ) {
         guard preparedSampleRate != buffer.sampleRate
                 || preparedChannelCount != buffer.channelCount

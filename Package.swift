@@ -1,55 +1,103 @@
-// swift-tools-version: 6.2
-// The swift-tools-version declares the minimum version of Swift required to build this package.
+// swift-tools-version: 6.3
 
 import PackageDescription
 
 let package = Package(
     name: "Capture",
     platforms: [
-        .macOS(.v14)
+        .macOS(.v26),
     ],
     products: [
         .library(
             name: "Capture",
-            targets: ["Capture"]
+            targets: [
+                "Capture",
+            ]
         ),
         .executable(
             name: "capturer",
-            targets: ["capturer"]
+            targets: [
+                "capturer",
+            ]
         ),
         .executable(
             name: "ctest",
-            targets: ["CaptureTestFlows"]
+            targets: [
+                "CaptureTestFlows",
+            ]
         ),
     ],
     dependencies: [
-        .package(url: "https://github.com/leviouwendijk/Terminal.git", branch: "master"),
-        .package(url: "https://github.com/leviouwendijk/Arguments.git", branch: "master"),
-        .package(url: "https://github.com/leviouwendijk/Methods.git", branch: "master"),
-        .package(url: "https://github.com/leviouwendijk/TestFlows.git", branch: "master"),
+        .package(
+            url: "https://github.com/leviouwendijk/Media.git",
+            branch: "master"
+        ),
+        .package(
+            url: "https://github.com/leviouwendijk/Terminal.git",
+            branch: "master"
+        ),
+        .package(
+            url: "https://github.com/leviouwendijk/Arguments.git",
+            branch: "master"
+        ),
+        .package(
+            url: "https://github.com/leviouwendijk/Methods.git",
+            branch: "master"
+        ),
+        .package(
+            url: "https://github.com/leviouwendijk/TestFlows.git",
+            branch: "master"
+        ),
     ],
     targets: [
         .target(
             name: "Capture",
             dependencies: [
-                .product(name: "Arguments", package: "Arguments"),
+                .product(
+                    name: "Arguments",
+                    package: "Arguments"
+                ),
+                .product(
+                    name: "MediaCore",
+                    package: "Media"
+                ),
             ]
         ),
         .executableTarget(
             name: "capturer",
             dependencies: [
                 "Capture",
-                .product(name: "Terminal", package: "Terminal"),
-                .product(name: "Arguments", package: "Arguments"),
-                .product(name: "Methods", package: "Methods"),
+                .product(
+                    name: "MediaCore",
+                    package: "Media"
+                ),
+                .product(
+                    name: "Terminal",
+                    package: "Terminal"
+                ),
+                .product(
+                    name: "Arguments",
+                    package: "Arguments"
+                ),
+                .product(
+                    name: "Methods",
+                    package: "Methods"
+                ),
             ],
-            path: "Sources/CaptureCLI",
+            path: "Sources/CaptureCLI"
         ),
         .executableTarget(
             name: "CaptureTestFlows",
             dependencies: [
                 "Capture",
-                .product(name: "TestFlows", package: "TestFlows"),
+                .product(
+                    name: "MediaCore",
+                    package: "Media"
+                ),
+                .product(
+                    name: "TestFlows",
+                    package: "TestFlows"
+                ),
             ]
         ),
     ]

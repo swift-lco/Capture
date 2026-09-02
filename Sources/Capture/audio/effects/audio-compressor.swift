@@ -1,3 +1,4 @@
+import MediaCore
 import Darwin
 import Foundation
 
@@ -159,8 +160,8 @@ public extension AudioCompressor {
         }
 
         public mutating func process(
-            _ buffer: CaptureAudioInputBuffer
-        ) throws -> CaptureAudioInputBuffer {
+            _ buffer: MediaAudioBuffer
+        ) throws -> MediaAudioBuffer {
             let configuration = AudioCompressorConfiguration(
                 thresholdDB: thresholdDB,
                 ratio: ratio,
@@ -244,8 +245,8 @@ public extension AudioCompressor {
         }
 
         public mutating func process(
-            _ buffer: CaptureAudioInputBuffer
-        ) throws -> CaptureAudioInputBuffer {
+            _ buffer: MediaAudioBuffer
+        ) throws -> MediaAudioBuffer {
             let compressed = try compressor.process(
                 buffer
             )
@@ -266,7 +267,7 @@ public extension AudioCompressor {
 
 private extension AudioCompressor.Standard {
     mutating func prepare(
-        buffer: CaptureAudioInputBuffer,
+        buffer: MediaAudioBuffer,
         configuration: AudioCompressorConfiguration
     ) {
         let channelCount = max(

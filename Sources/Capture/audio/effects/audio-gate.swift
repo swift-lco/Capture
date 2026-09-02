@@ -1,3 +1,4 @@
+import MediaCore
 import Darwin
 import Foundation
 
@@ -106,8 +107,8 @@ public extension AudioGate {
         }
 
         public mutating func process(
-            _ buffer: CaptureAudioInputBuffer
-        ) throws -> CaptureAudioInputBuffer {
+            _ buffer: MediaAudioBuffer
+        ) throws -> MediaAudioBuffer {
             prepare(
                 buffer: buffer
             )
@@ -151,8 +152,8 @@ public extension AudioGate {
         }
 
         public mutating func process(
-            _ buffer: CaptureAudioInputBuffer
-        ) throws -> CaptureAudioInputBuffer {
+            _ buffer: MediaAudioBuffer
+        ) throws -> MediaAudioBuffer {
             buffer.mapFloatSamples { sample in
                 abs(
                     sample
@@ -166,7 +167,7 @@ public extension AudioGate {
 
 private extension AudioGate.Soft {
     mutating func prepare(
-        buffer: CaptureAudioInputBuffer
+        buffer: MediaAudioBuffer
     ) {
         let channelCount = max(
             1,

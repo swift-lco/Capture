@@ -1,9 +1,10 @@
+import MediaCore
 import Foundation
 
 public protocol AudioProcessor: Sendable {
     mutating func process(
-        _ buffer: CaptureAudioInputBuffer
-    ) throws -> CaptureAudioInputBuffer
+        _ buffer: MediaAudioBuffer
+    ) throws -> MediaAudioBuffer
 }
 
 public struct AudioChain: Sendable {
@@ -40,8 +41,8 @@ public struct AudioChain: Sendable {
     }
 
     public mutating func process(
-        _ buffer: CaptureAudioInputBuffer
-    ) throws -> CaptureAudioInputBuffer {
+        _ buffer: MediaAudioBuffer
+    ) throws -> MediaAudioBuffer {
         var current = buffer
 
         for index in processors.indices {

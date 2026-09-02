@@ -1,3 +1,4 @@
+import MediaCore
 import AudioToolbox
 import Foundation
 
@@ -59,7 +60,7 @@ internal final class WAVAudioSink: CaptureAudioSink, @unchecked Sendable {
     }
 
     internal func append(
-        _ buffer: CaptureAudioInputBuffer
+        _ buffer: MediaAudioBuffer
     ) throws {
         lock.lock()
         defer {

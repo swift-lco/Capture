@@ -1,7 +1,8 @@
+import MediaCore
 import Foundation
 
 public typealias CaptureAudioInputHandler = @Sendable (
-    CaptureAudioInputBuffer
+    MediaAudioBuffer
 ) throws -> Void
 
 public final class CaptureAudioInputSession: @unchecked Sendable {
@@ -147,7 +148,7 @@ private extension CaptureAudioInputSession {
     }
 
     func handle(
-        _ buffer: CaptureAudioInputBuffer
+        _ buffer: MediaAudioBuffer
     ) throws {
         let processed = try process(
             buffer
@@ -159,8 +160,8 @@ private extension CaptureAudioInputSession {
     }
 
     func process(
-        _ buffer: CaptureAudioInputBuffer
-    ) throws -> CaptureAudioInputBuffer {
+        _ buffer: MediaAudioBuffer
+    ) throws -> MediaAudioBuffer {
         chainLock.lock()
         defer {
             chainLock.unlock()

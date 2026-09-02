@@ -1,3 +1,4 @@
+import MediaCore
 import Foundation
 
 public struct CaptureAudioOptions: Sendable, Codable, Hashable {

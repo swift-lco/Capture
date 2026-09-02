@@ -1,3 +1,4 @@
+import MediaCore
 import AudioToolbox
 import CoreAudio
 import Foundation
@@ -6,7 +7,7 @@ internal final class CoreAudioInputStream: CaptureAudioInputStream, @unchecked S
     private let device: CaptureDevice
     private let audio: CaptureAudioOptions
     private let startHandler: CaptureAudioInputStartHandler
-    private let bufferHandler: CaptureAudioInputBufferHandler
+    private let bufferHandler: MediaAudioBufferHandler
     private let stateLock = NSLock()
 
     private var format: AudioStreamBasicDescription
@@ -20,7 +21,7 @@ internal final class CoreAudioInputStream: CaptureAudioInputStream, @unchecked S
         device: CaptureDevice,
         audio: CaptureAudioOptions,
         startHandler: @escaping CaptureAudioInputStartHandler = { _ in },
-        bufferHandler: @escaping CaptureAudioInputBufferHandler
+        bufferHandler: @escaping MediaAudioBufferHandler
     ) {
         self.device = device
         self.audio = audio
@@ -305,7 +306,7 @@ private extension CoreAudioInputStream {
         packetCount: UInt32,
         packetDescriptions: UnsafePointer<AudioStreamPacketDescription>?
     ) {
-        let inputBuffer: CaptureAudioInputBuffer
+        let inputBuffer: MediaAudioBuffer
 
         stateLock.lock()
 
@@ -356,7 +357,7 @@ private extension CoreAudioInputStream {
             data = Data()
         }
 
-        inputBuffer = CaptureAudioInputBuffer(
+        inputBuffer = MediaAudioBuffer(
             data: data,
             frameCount: frameCount,
             packetCount: packets,

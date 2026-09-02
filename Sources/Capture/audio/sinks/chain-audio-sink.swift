@@ -1,3 +1,4 @@
+import MediaCore
 import AudioToolbox
 import Foundation
 
@@ -24,7 +25,7 @@ internal final class ChainAudioSink: CaptureAudioSink, @unchecked Sendable {
     }
 
     internal func append(
-        _ buffer: CaptureAudioInputBuffer
+        _ buffer: MediaAudioBuffer
     ) throws {
         let processed = try process(
             buffer
@@ -46,8 +47,8 @@ internal final class ChainAudioSink: CaptureAudioSink, @unchecked Sendable {
 
 private extension ChainAudioSink {
     func process(
-        _ buffer: CaptureAudioInputBuffer
-    ) throws -> CaptureAudioInputBuffer {
+        _ buffer: MediaAudioBuffer
+    ) throws -> MediaAudioBuffer {
         lock.lock()
         defer {
             lock.unlock()

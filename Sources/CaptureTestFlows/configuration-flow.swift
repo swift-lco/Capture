@@ -1,5 +1,6 @@
 import Capture
 import Foundation
+import MediaCore
 import TestFlows
 
 extension CaptureFlowSuite {
@@ -169,6 +170,42 @@ extension CaptureFlowSuite {
                 )
             }
 
+            Step("capture audio uses MediaCore primitives") {
+                let audio = try CaptureAudioOptions(
+                    sample: .float32
+                )
+                let sample: Audio.Sample = audio.sample
+                let source = MediaAudioBuffer(
+                    data: Data(),
+                    frameCount: 0,
+                    packetCount: 0,
+                    sampleRate: audio.sampleRate,
+                    channelCount: audio.channel,
+                    sample: sample,
+                    hostTimeSeconds: 12.5
+                )
+                var chain = AudioChain.raw
+                let processed = try chain.process(
+                    source
+                )
+
+                try Expect.equal(
+                    sample,
+                    .float32,
+                    "audio.media-core-sample"
+                )
+                try Expect.equal(
+                    processed.sample,
+                    .float32,
+                    "audio.media-core-buffer-sample"
+                )
+                try Expect.equal(
+                    processed.hostTimeSeconds,
+                    12.5,
+                    "audio.media-core-buffer-host-time"
+                )
+            }
+
             Step("valid audio record options parse") {
                 let options = try CaptureRecordOptions(
                     durationSeconds: 5
@@ -206,15 +243,26 @@ extension CaptureFlowSuite {
             }
 
             Step("missing output throws") {
+                let missingOutput = try Expect.notNil(
+                    URL(
+                        string: "capture:"
+                    ),
+                    "configuration.missing-output-url"
+                )
+
+                try Expect.equal(
+                    missingOutput.path,
+                    "",
+                    "configuration.missing-output-path"
+                )
+
                 try Expect.throwsError(
                     "configuration.missing-output"
                 ) {
                     _ = try CaptureConfiguration(
                         video: CaptureVideoOptions(),
                         audio: CaptureAudioOptions(),
-                        output: URL(
-                            fileURLWithPath: ""
-                        )
+                        output: missingOutput
                     )
                 }
             }

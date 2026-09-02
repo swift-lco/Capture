@@ -1,3 +1,4 @@
+import MediaCore
 import Capture
 import Foundation
 
@@ -98,7 +99,7 @@ private final class LiveAudioSmokeCounter: @unchecked Sendable {
     private var firstHostTimeSeconds: TimeInterval?
 
     fileprivate func record(
-        _ buffer: CaptureAudioInputBuffer
+        _ buffer: MediaAudioBuffer
     ) {
         lock.lock()
         defer {
