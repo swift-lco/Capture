@@ -20,12 +20,6 @@ let package = Package(
                 "capturer",
             ]
         ),
-        .executable(
-            name: "ctest",
-            targets: [
-                "CaptureTestFlows",
-            ]
-        ),
     ],
     dependencies: [
         .package(
@@ -42,10 +36,6 @@ let package = Package(
         ),
         .package(
             url: "https://github.com/leviouwendijk/Methods.git",
-            branch: "master"
-        ),
-        .package(
-            url: "https://github.com/leviouwendijk/TestFlows.git",
             branch: "master"
         ),
     ],
@@ -85,20 +75,6 @@ let package = Package(
                 ),
             ],
             path: "Sources/CaptureCLI"
-        ),
-        .executableTarget(
-            name: "CaptureTestFlows",
-            dependencies: [
-                "Capture",
-                .product(
-                    name: "MediaCore",
-                    package: "Media"
-                ),
-                .product(
-                    name: "TestFlows",
-                    package: "TestFlows"
-                ),
-            ]
         ),
     ]
 )
