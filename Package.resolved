@@ -31,7 +31,7 @@
     {
       "identity" : "dsl",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/leviouwendijk/DSL",
+      "location" : "https://github.com/swift-dsl/DSL",
       "state" : {
         "branch" : "master",
         "revision" : "9efff74e61ff3679fce19f3cbf6df09c3bc23691"
@@ -76,7 +76,7 @@
     {
       "identity" : "parsing",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/leviouwendijk/Parsing.git",
+      "location" : "https://github.com/swift-langs/Parsing.git",
       "state" : {
         "branch" : "master",
         "revision" : "b415cec83b0499158df5d0faeb760a2d4943d236"
